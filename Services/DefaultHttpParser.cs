@@ -11,6 +11,8 @@ public class DefaultHttpParser : IDefaultHttpParser
     {
         //actually parsing the logic.
         
+        //TODO why does it come in as random binary data? did you use debugger? 
+        //TODO what if the headers arnt in that order?? cant hardcode that. 
         var lines = requestData.ToString().Split("\r\n");
         
         var requestLine = lines[0].Split(" ");
