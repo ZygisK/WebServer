@@ -1,7 +1,7 @@
 ﻿using System.Net;
-using System.Net.Http.Json;
 using System.Net.Sockets;
 using System.Text;
+using WebServer_guys.models;
 using WebServer_guys.services;
 
 namespace WebServer_guys;
@@ -11,7 +11,7 @@ public class TCPServer
     private readonly IDefaultHttpParser _parser;
     private TcpListener _tcpListener; //new instance of tcplistender
     private bool running = false; //control the running state
-    
+
     //constructor
     public TCPServer(IDefaultHttpParser parser)
     {
@@ -19,74 +19,105 @@ public class TCPServer
         _tcpListener = new TcpListener(IPAddress.Any, 5001); //initialises tcplistener on any ipadress at specified port
     }
 
-    public void StartServer()
+    public async Task StartServerAsync()
     {
         Console.WriteLine("waiting for connnection");
         _tcpListener.Start(); //listen for incoming requests
 
-        var client = _tcpListener.AcceptTcpClient(); //tcpClient accepts the request
-            
-        Console.WriteLine("client has connected");
-        
-        
-        //todo listen for full data (fix this)
+        while (true)
+        {
+            var client = await _tcpListener.AcceptTcpClientAsync(); //tcpClient accepts the request
+            Console.WriteLine("client has connected");
+            await HandleClient(client); //task.run takes in the parameter of what you want to run asynchronsly
+        }
+    }
+    
+    private async Task HandleClient(TcpClient client)
+    {
         using var reader = new StreamReader(client.GetStream()); //read the clients stream
-        
+
         var requestedText = new StringBuilder(); //store the text
         string line;
-        while ((line = reader.ReadLine()) != null && line != string.Empty)
+        while ((line = await reader.ReadLineAsync()) != null && line != string.Empty)
         {
             requestedText.AppendLine(line); //append each line
         }
-        
-        //todo parse the request
+
         var requestModel = _parser.ParseHttpRequest(requestedText); //handle client (read the data)
-        
-        //todo figure out response method
-        // SendResponse(requestModel)
-        client.Close(); 
+
+        SendResponse(client, requestModel);
+        client.Close();
     }
 
-    //where server listens for incoming connections
-    // private void Run()
-    // {
-    //     running = true;
-    //     _tcpListener.Start(); //listen for incoming requests
-    //
-    //     while (running)
-    //     {
-    //         Console.WriteLine("waiting for connnection");
-    //         
-    //         TcpClient client = _tcpListener.AcceptTcpClient(); //tcpClient accepts the request
-    //         
-    //         Console.WriteLine("client has connected");
-    //         
-    //         HandleClient(client); //handle client (read the data)
-    //         client.Close(); 
-    //     }
-    //     
-    //     _tcpListener.Stop();
-    //     running = false;
-    // }
+    public async Task SendResponse(TcpClient client, HttpRequestModel requestModel)
+    {
+        // var responseContent = $"Received request \nMethod: {requestModel.Method} \nPath: {requestModel.Path}";
+        // foreach (var header in requestModel.Headers)
+        // {
+        //     responseContent += $"{header}\n";
+        // }
+        
+       // var response =
+        //    $"HTTP/1.1 200 OK\r\nContent-Length: {Encoding.UTF8.GetByteCount(responseContent)}\r\nContent-Type: text/plain\r\n\r\n{responseContent}";
+        
 
-    // private void HandleClient(TcpClient client)
-    // {
-    //     //"using" means it auto desposes data when its no longer needed
-    //     using var reader = new StreamReader(client.GetStream()); //read the clients stream
-    //     
-    //     StringBuilder requestedText = new StringBuilder(); //store the text
-    //     String line;
-    //     while ((line = reader.ReadLine()) != null && line != String.Empty)
-    //     {
-    //         requestedText.AppendLine(line); //append each line
-    //     }
-    //
-    //     var request = Request.GetRequest(requestedText.ToString()); //parse the request
-    //     Console.WriteLine("Type: " + request?.Type);
-    //     Console.WriteLine("URL: " + request?.URL);
-    //     Console.WriteLine("Host: " + request?.HOST);
-    //     Console.WriteLine("Time ");
-    //     //Console.WriteLine("Postman Token: " + request?.POSTMANTOKEN);
-    //     //Console.WriteLine(requestedText);
-    // // }
+        //var responseBytes = Encoding.UTF8.GetBytes(response);
+        
+        
+        
+       // client.GetStream().Write(responseBytes, 0, responseBytes.Length);
+       //client.GetStream().Flush();
+
+
+       string basePath = "Websites";
+       string filePath = Path.Combine(basePath, requestModel.Path.TrimStart('/'));
+        
+       Console.WriteLine($"Checking file at path: {filePath}");
+       if (File.Exists(filePath))
+       {
+           var fileContent = await File.ReadAllBytesAsync(filePath);
+           var responseHeader = $"HTTP/1.1 200 OK\r\nContent-Type: {GetContentType(filePath)}; charset=utf-8\r\nContent-Length: {fileContent.Length + fileContent.Length}\r\n\r\n";
+           //string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 13\r\n\r\n<h1>Hello</h1>";
+           
+           Console.WriteLine($"Sending {fileContent.Length} bytes with header: {responseHeader}");
+           
+           var responseBytes = Encoding.UTF8.GetBytes(responseHeader);
+
+           await client.GetStream().WriteAsync(responseBytes, 0 , responseBytes.Length);
+           await client.GetStream().WriteAsync(fileContent, 0 , fileContent.Length);
+           await client.GetStream().FlushAsync();
+           
+           Console.WriteLine("Response sent successfully.");
+       }
+
+       else
+       {
+           string response = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+           var responseBytes = Encoding.UTF8.GetBytes(response);
+           Console.WriteLine("File not found, sending 404.");
+           await client.GetStream().WriteAsync(responseBytes, 0, responseBytes.Length);
+           await client.GetStream().FlushAsync();
+       }
+    }
+
+    private string GetContentType(string path)
+    {
+        var extension = Path.GetExtension(path).ToLower();
+        switch (extension)
+        {
+            case ".html":
+                return "text/html";
+            case ".css":
+                return "text/css";
+            case ".js":
+                return "application/javascript";
+            case ".png":
+                return "image/png";
+            case ".jpg":
+            case ".jpeg":
+                return "image/jpeg";
+            default:
+                return "application/octet-stream";
+        }
+    }
 }

@@ -19,7 +19,7 @@ public class Worker : BackgroundService
         // {
         //     var server = new TCPServer(website);
         // }
-        _server.StartServer();
+        _server.StartServerAsync();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
