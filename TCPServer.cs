@@ -69,16 +69,14 @@ public class TCPServer
        //client.GetStream().Flush();
 
 
-       string basePath = "Websites";
-       string filePath = Path.Combine(basePath, requestModel.Path.TrimStart('/'));
+       string filePath = "Websites/index.html";
+       //string filePath = Path.Combine(basePath, requestModel.Path.TrimStart('/'));
         
        Console.WriteLine($"Checking file at path: {filePath}");
        if (File.Exists(filePath))
        {
            var fileContent = await File.ReadAllBytesAsync(filePath);
-           var responseHeader = $"HTTP/1.1 200 OK\r\n" +
-                                $"Content-Type: {GetContentType(filePath)}; charset=utf-8\r\n" +
-                                $"Content-Length: {fileContent.Length + fileContent.Length}\r\n\r\n";
+           var responseHeader = $"HTTP/1.1 200 OK\r\nContent-Type: {GetContentType(filePath)}; charset=utf-8\r\nContent-Length: {fileContent.Length + fileContent.Length}\r\n\r\n";
            //string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 13\r\n\r\n<h1>Hello</h1>";
            
            Console.WriteLine($"Sending {fileContent.Length} bytes with header: {responseHeader}");

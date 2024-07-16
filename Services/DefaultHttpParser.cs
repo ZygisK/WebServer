@@ -18,7 +18,7 @@ public class DefaultHttpParser : IDefaultHttpParser
         var requestLine = lines[0].Split(" ");
         var path = requestLine[1];
         var method = requestLine[0];
-        //var host = "";
+        //var host = requestLine[4];
 
         var headers = new List<string>();
         
