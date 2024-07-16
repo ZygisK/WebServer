@@ -9,35 +9,35 @@ namespace WebServer_guys;
 public class TCPServer
 {
     private readonly IDefaultHttpParser _parser;
-    private TcpListener _tcpListener; //new instance of tcplistender
-    private bool running = false; //control the running state
+    private TcpListener _tcpListener; //new instance of tenderiser
 
     private WebsiteModel _website;
 
     //constructor
-     public TCPServer(IDefaultHttpParser parser, WebsiteModel website)
-     {
-         _parser = parser;
-         _tcpListener = new TcpListener(IPAddress.Any, website.Port); //initialises tcplistener on any ipadress at specified port
-         _website = website;
-         
-         StartServerAsync();
-     }
-
-    public async Task StartServerAsync()
+    public TCPServer(IDefaultHttpParser parser)
     {
+        _parser = parser;
+    }
+
+    public async Task StartServerAsync(WebsiteModel website)
+    {
+        _website = website;
         
-        Console.WriteLine("waiting for connnection");
+        _tcpListener =
+            new TcpListener(IPAddress.Any, website.Port); //initialises listener on any ipaddress at specified port
+        
+        
+        Console.WriteLine("waiting for connection");
         _tcpListener.Start(); //listen for incoming requests
 
         while (true)
         {
             var client = await _tcpListener.AcceptTcpClientAsync(); //tcpClient accepts the request
             Console.WriteLine("client has connected");
-            await HandleClient(client); //task.run takes in the parameter of what you want to run asynchronsly
+            await HandleClient(client); //task.run takes in the parameter of what you want to run asynchronously
         }
     }
-    
+
     private async Task HandleClient(TcpClient client)
     {
         using var reader = new StreamReader(client.GetStream()); //read the clients stream
@@ -62,48 +62,48 @@ public class TCPServer
         // {
         //     responseContent += $"{header}\n";
         // }
-        
-       // var response =
+
+        // var response =
         //    $"HTTP/1.1 200 OK\r\nContent-Length: {Encoding.UTF8.GetByteCount(responseContent)}\r\nContent-Type: text/plain\r\n\r\n{responseContent}";
-        
+
 
         //var responseBytes = Encoding.UTF8.GetBytes(response);
-        
-        
-        
-       // client.GetStream().Write(responseBytes, 0, responseBytes.Length);
-       //client.GetStream().Flush();
 
 
-       string filePath = "Websites/index.html";
-       //string filePath = Path.Combine(basePath, requestModel.Path.TrimStart('/'));
-        
-       Console.WriteLine($"Checking file at path: {filePath}");
-       if (File.Exists(filePath))
-       {
-           var fileContent = await File.ReadAllBytesAsync(filePath);
-           var responseHeader = $"HTTP/1.1 200 OK\r\nContent-Type: {GetContentType(filePath)}; charset=utf-8\r\nContent-Length: {fileContent.Length + fileContent.Length}\r\n\r\n";
-           //string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 13\r\n\r\n<h1>Hello</h1>";
-           
-           Console.WriteLine($"Sending {fileContent.Length} bytes with header: {responseHeader}");
-           
-           var responseBytes = Encoding.UTF8.GetBytes(responseHeader);
+        // client.GetStream().Write(responseBytes, 0, responseBytes.Length);
+        //client.GetStream().Flush();
 
-           await client.GetStream().WriteAsync(responseBytes, 0 , responseBytes.Length);
-           await client.GetStream().WriteAsync(fileContent, 0 , fileContent.Length);
-           await client.GetStream().FlushAsync();
-           
-           Console.WriteLine("Response sent successfully.");
-       }
 
-       else
-       {
-           string response = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
-           var responseBytes = Encoding.UTF8.GetBytes(response);
-           Console.WriteLine("File not found, sending 404.");
-           await client.GetStream().WriteAsync(responseBytes, 0, responseBytes.Length);
-           await client.GetStream().FlushAsync();
-       }
+        string filePath = "Websites/index.html";
+        //string filePath = Path.Combine(basePath, requestModel.Path.TrimStart('/'));
+
+        Console.WriteLine($"Checking file at path: {filePath}");
+        if (File.Exists(filePath))
+        {
+            var fileContent = await File.ReadAllBytesAsync(filePath);
+            var responseHeader =
+                $"HTTP/1.1 200 OK\r\nContent-Type: {GetContentType(filePath)}; charset=utf-8\r\nContent-Length: {fileContent.Length + fileContent.Length}\r\n\r\n";
+            //string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 13\r\n\r\n<h1>Hello</h1>";
+
+            Console.WriteLine($"Sending {fileContent.Length} bytes with header: {responseHeader}");
+
+            var responseBytes = Encoding.UTF8.GetBytes(responseHeader);
+
+            await client.GetStream().WriteAsync(responseBytes, 0, responseBytes.Length);
+            await client.GetStream().WriteAsync(fileContent, 0, fileContent.Length);
+            await client.GetStream().FlushAsync();
+
+            Console.WriteLine("Response sent successfully.");
+        }
+
+        else
+        {
+            string response = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+            var responseBytes = Encoding.UTF8.GetBytes(response);
+            Console.WriteLine("File not found, sending 404.");
+            await client.GetStream().WriteAsync(responseBytes, 0, responseBytes.Length);
+            await client.GetStream().FlushAsync();
+        }
     }
 
     private string GetContentType(string path)

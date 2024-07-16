@@ -2,5 +2,5 @@
 
 public class WebsiteConfig
 {
-    public IList<WebsiteModel>? Websites { get; set; } = new List<WebsiteModel>();
+    public IList<WebsiteModel> Websites { get; set; } = new List<WebsiteModel>();
 }
