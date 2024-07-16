@@ -2,11 +2,13 @@
   "Websites": [
     {
       "Name": "Nigger",
+      "Path" : "baseWebsite",
       "Port": 5001,
       "DefaultPage": "index.html"
     },
     {
       "Name": "Nigger2",
+      "Path" : "XtraceLoginPage",
       "Port": 5002,
       "DefaultPage": "index.html"
     }
