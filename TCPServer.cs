@@ -21,7 +21,8 @@ public class TCPServer
 
     public async Task StartServerAsync(WebsiteModel website)
     {
-        _tcpListener = new TcpListener(IPAddress.Any, website.Port); // Initialize listener on any IP address at the specified port
+        _tcpListener =
+            new TcpListener(IPAddress.Any, website.Port); // Initialize listener on any IP address at the specified port
         Console.WriteLine($"Waiting for connection on port {website.Port}");
         _tcpListener.Start(); // Listen for incoming requests
 
@@ -35,19 +36,29 @@ public class TCPServer
 
     private async Task HandleClient(TcpClient client)
     {
-        using var reader = new StreamReader(client.GetStream()); //read the clients stream
-
-        var requestedText = new StringBuilder(); //store the text
-        string line;
-        while ((line = await reader.ReadLineAsync()) != null && line != string.Empty)
+        try
         {
-            requestedText.AppendLine(line); //append each line
+            using var reader = new StreamReader(client.GetStream()); // Read the client's stream
+
+            var requestedText = new StringBuilder(); // Store the text
+            string line;
+            while ((line = await reader.ReadLineAsync()) != null && line != string.Empty)
+            {
+                requestedText.AppendLine(line); // Append each line
+            }
+
+            var requestModel = _parser.ParseHttpRequest(requestedText); // Handle client (read the data)
+
+            await SendResponse(client, requestModel); // Send response
         }
-
-        var requestModel = _parser.ParseHttpRequest(requestedText); //handle client (read the data)
-
-        SendResponse(client, requestModel);
-        client.Close();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error handling client: {ex.Message}");
+        }
+        finally
+        {
+            client.Close();
+        }
     }
 
     public async Task SendResponse(TcpClient client, HttpRequestModel requestModel)
