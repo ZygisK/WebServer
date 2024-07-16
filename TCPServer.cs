@@ -21,20 +21,15 @@ public class TCPServer
 
     public async Task StartServerAsync(WebsiteModel website)
     {
-        _website = website;
-        
-        _tcpListener =
-            new TcpListener(IPAddress.Any, website.Port); //initialises listener on any ipaddress at specified port
-        
-        
-        Console.WriteLine("waiting for connection");
-        _tcpListener.Start(); //listen for incoming requests
+        _tcpListener = new TcpListener(IPAddress.Any, website.Port); // Initialize listener on any IP address at the specified port
+        Console.WriteLine($"Waiting for connection on port {website.Port}");
+        _tcpListener.Start(); // Listen for incoming requests
 
         while (true)
         {
-            var client = await _tcpListener.AcceptTcpClientAsync(); //tcpClient accepts the request
-            Console.WriteLine("client has connected");
-            await HandleClient(client); //task.run takes in the parameter of what you want to run asynchronously
+            var client = await _tcpListener.AcceptTcpClientAsync(); // Accept incoming request
+            Console.WriteLine("Client has connected");
+            _ = HandleClient(client); // Handle client asynchronously
         }
     }
 

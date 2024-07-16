@@ -16,7 +16,7 @@ var websites = baseWebsitesConfig.Get<WebsiteConfig>();
 builder.Services.AddHostedService<Worker>();
 
 builder.Services.AddTransient<IDefaultHttpParser, DefaultHttpParser>();
-builder.Services.AddTransient<TCPServer>();
+// builder.Services.AddTransient<TCPServer>();
 
 var host = builder.Build();
 

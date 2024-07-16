@@ -9,21 +9,24 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly TCPServer _server;
+    private readonly IDefaultHttpParser _parser;
 
     private readonly IList<WebsiteModel>? websites;
-    public Worker(IOptions<WebsiteConfig> websiteConfig, ILogger<Worker> logger, TCPServer server)
-    { 
+
+    public Worker(IOptions<WebsiteConfig> websiteConfig, ILogger<Worker> logger, TCPServer server, IDefaultHttpParser parser)
+    {
         websites = websiteConfig.Value.Websites;
         _logger = logger;
         _server = server;
+        _parser = parser;
     }
 
     public void StartWebsites()
     {
         foreach (var website in websites) //start a website
         {
-            var thread = new Thread(() => _ = _server.StartServerAsync(website));
-            thread.Start();
+            var websiteServer = new TCPServer(_parser); 
+            _ = websiteServer.StartServerAsync(website);
         }
     }
 
