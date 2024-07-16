@@ -12,15 +12,21 @@ public class TCPServer
     private TcpListener _tcpListener; //new instance of tcplistender
     private bool running = false; //control the running state
 
+    private WebsiteModel _website;
+
     //constructor
-    public TCPServer(IDefaultHttpParser parser)
-    {
-        _parser = parser;
-        _tcpListener = new TcpListener(IPAddress.Any, 5001); //initialises tcplistener on any ipadress at specified port
-    }
+     public TCPServer(IDefaultHttpParser parser, WebsiteModel website)
+     {
+         _parser = parser;
+         _tcpListener = new TcpListener(IPAddress.Any, website.Port); //initialises tcplistener on any ipadress at specified port
+         _website = website;
+         
+         StartServerAsync();
+     }
 
     public async Task StartServerAsync()
     {
+        
         Console.WriteLine("waiting for connnection");
         _tcpListener.Start(); //listen for incoming requests
 

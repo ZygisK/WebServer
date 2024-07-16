@@ -1,6 +1,7 @@
 using System.Net.Sockets;
 using Microsoft.Extensions.Options;
 using WebServer_guys.models;
+using WebServer_guys.services;
 
 namespace WebServer_guys;
 
@@ -8,23 +9,25 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly TCPServer _server;
+    private readonly IDefaultHttpParser _parser;
 
     private readonly IList<WebsiteModel> websites;
-    public Worker(IOptions<WebsiteConfig> websiteConfig, ILogger<Worker> logger, TCPServer server)
+    public Worker(IOptions<WebsiteConfig> websiteConfig, ILogger<Worker> logger, TCPServer server, IDefaultHttpParser parser)
     {
         websites = websiteConfig.Value.Websites!;
         _logger = logger;
         _server = server;
+        _parser = parser;
     }
 
     public void StartWebsites()
     {
-        foreach (var website in websites!)
+        foreach (var website in websites!) //start a website
         {
             //todo look here nigger ziggy
-            // var server = new TCPServer(website);
+            var server = new TCPServer(_parser, website);
         }
-        _server.StartServerAsync();
+        //_server.StartServerAsync();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
