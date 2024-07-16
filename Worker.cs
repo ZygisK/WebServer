@@ -1,4 +1,6 @@
 using System.Net.Sockets;
+using Microsoft.Extensions.Options;
+using WebServer_guys.models;
 
 namespace WebServer_guys;
 
@@ -7,18 +9,21 @@ public class Worker : BackgroundService
     private readonly ILogger<Worker> _logger;
     private readonly TCPServer _server;
 
-    public Worker(ILogger<Worker> logger, TCPServer server)
+    private readonly IList<WebsiteModel> websites;
+    public Worker(IOptions<WebsiteConfig> websiteConfig, ILogger<Worker> logger, TCPServer server)
     {
+        websites = websiteConfig.Value.Websites!;
         _logger = logger;
         _server = server;
     }
 
     public void StartWebsites()
     {
-        // foreach (var website in websites)
-        // {
-        //     var server = new TCPServer(website);
-        // }
+        foreach (var website in websites!)
+        {
+            //todo look here nigger ziggy
+            // var server = new TCPServer(website);
+        }
         _server.StartServerAsync();
     }
 
