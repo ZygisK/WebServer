@@ -30,7 +30,10 @@ public class TCPServer
         {
             var client = await _tcpListener.AcceptTcpClientAsync(); // Accept incoming request
             Console.WriteLine("Client has connected");
-            _ = HandleClient(client); // Handle client asynchronously, _ is called a discard variable, it's a way to call asynchronously method without waiting for it to complete and capture result
+            
+            //Handle client asynchronously, but do not wait for the task to complete
+            _ = HandleClient(client); //_ discard variable
+            //in our case, StartServerAsync does not wait for HandleClient() to finish so we can accept multiple clients.
         }
     }
 
@@ -67,7 +70,6 @@ public class TCPServer
     {
         string basepath = "Websites";
         string websitePath = _website.Path;
-        //string homepage = _website.DefaultPage;
         string requestPath = requestModel.Path;
 
         if (requestPath == "/")
@@ -81,6 +83,7 @@ public class TCPServer
         }
         
         string filePath = Path.Combine(basepath, websitePath, requestPath);
+        
         Console.WriteLine($"Checking file at path: {filePath}");
         
         if (File.Exists(filePath))
@@ -88,7 +91,6 @@ public class TCPServer
             var fileContent = await File.ReadAllBytesAsync(filePath);
             var responseHeader =
                 $"HTTP/1.1 200 OK\r\nContent-Type: {GetContentType(filePath)}; charset=utf-8\r\nContent-Length: {fileContent.Length}\r\n\r\n";
-            //string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 13\r\n\r\n<h1>Hello</h1>";
         
             Console.WriteLine($"Sending {fileContent.Length} bytes with header: {responseHeader}");
         

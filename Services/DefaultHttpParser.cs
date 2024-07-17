@@ -10,25 +10,30 @@ public class DefaultHttpParser : IDefaultHttpParser
     public HttpRequestModel ParseHttpRequest(StringBuilder requestData)
     {
         //actually parsing the logic.
-        
-        //TODO why does it come in as random binary data? did you use debugger? 
-        //TODO what if the headers arnt in that order?? cant hardcode that. 
-        var lines = requestData.ToString().Split("\r\n");
+
+        var lines = requestData.ToString().Split("\r\n"); 
         
         var requestLine = lines[0].Split(" ");
         var path = requestLine[1];
         var method = requestLine[0];
         //var host = requestLine[4];
 
-        var headers = new List<string>();
+        //var headers = new List<string>();
+        var headers = new List<KeyValuePair<string, string>>();
         
         for (int i = 1; i < lines.Length; i++)
         {
+            string line = lines[i];
             if (string.IsNullOrEmpty(lines[i]))
             {
                 break;
             }
-            headers.Add(lines[i]);
+
+            int colonIndex = line.IndexOf(':'); //indexOf gets the first occurrence of : in a sting
+            
+            string key = line.Substring(0,colonIndex); //gets what's before the :
+            string value = line.Substring(colonIndex + 1); //gets what's after the :
+            headers.Add(new KeyValuePair<string, string>(key, value));
         }
 
         return new HttpRequestModel

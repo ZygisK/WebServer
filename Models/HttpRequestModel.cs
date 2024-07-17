@@ -6,5 +6,6 @@ public class HttpRequestModel
     public string Path { get; set; }
     public string Method { get; set; }
 
-    public IList<string> Headers = new List<string>();
+    //public IList<string> Headers = new List<string>();
+    public IList<KeyValuePair<string, string>> Headers = new List<KeyValuePair<string, string>>();
 }
