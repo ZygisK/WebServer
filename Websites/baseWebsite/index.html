@@ -3,37 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple HTML Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            text-align: center;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #333;
-        }
-        p {
-            color: #666;
-        }
-    </style>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="container">
-    <h1>Hello, World!</h1>
-    <p>Welcome to your simple HTML page.</p>
-</div>
+<header>
+    <h1>Admin Dashboard</h1>
+</header>
+
+<aside class="sidebar">
+    <ul>
+        <li><button id="btnDashboard" class="active">Dashboard</button></li>
+        <li><button id="btnUsers">Users</button></li>
+        <li><button id="btnProducts">Products</button></li>
+        <li><button id="btnSettings">Settings</button></li>
+    </ul>
+</aside>
+
+<main class="main-content">
+    <div class="container">
+        <h2>Welcome to your Admin Dashboard</h2>
+        <p>Manage users, products, and settings here.</p>
+
+        <div id="dashboardContent">
+            <h3>Dashboard Overview</h3>
+            <p>Summary of important data and statistics.</p>
+        </div>
+    </div>
+</main>
+
+<script src="script.js"></script>
 </body>
 </html>

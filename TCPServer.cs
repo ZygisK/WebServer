@@ -21,8 +21,8 @@ public class TCPServer
 
     public async Task StartServerAsync(WebsiteModel website)
     {
-        _tcpListener =
-            new TcpListener(IPAddress.Any, website.Port); // Initialize listener on any IP address at the specified port
+        _website = website;
+        _tcpListener = new TcpListener(IPAddress.Any, website.Port); // Initialize listener on any IP address at the specified port
         Console.WriteLine($"Waiting for connection on port {website.Port}");
         _tcpListener.Start(); // Listen for incoming requests
 
@@ -30,7 +30,7 @@ public class TCPServer
         {
             var client = await _tcpListener.AcceptTcpClientAsync(); // Accept incoming request
             Console.WriteLine("Client has connected");
-            _ = HandleClient(client); // Handle client asynchronously
+            _ = HandleClient(client); // Handle client asynchronously, _ is called a discard variable, it's a way to call asynchronously method without waiting for it to complete and capture result
         }
     }
 
@@ -49,6 +49,8 @@ public class TCPServer
 
             var requestModel = _parser.ParseHttpRequest(requestedText); // Handle client (read the data)
 
+            
+
             await SendResponse(client, requestModel); // Send response
         }
         catch (Exception ex)
@@ -63,42 +65,39 @@ public class TCPServer
 
     public async Task SendResponse(TcpClient client, HttpRequestModel requestModel)
     {
-        // var responseContent = $"Received request \nMethod: {requestModel.Method} \nPath: {requestModel.Path}";
-        // foreach (var header in requestModel.Headers)
-        // {
-        //     responseContent += $"{header}\n";
-        // }
+        string basepath = "Websites";
+        string websitePath = _website.Path;
+        //string homepage = _website.DefaultPage;
+        string requestPath = requestModel.Path;
 
-        // var response =
-        //    $"HTTP/1.1 200 OK\r\nContent-Length: {Encoding.UTF8.GetByteCount(responseContent)}\r\nContent-Type: text/plain\r\n\r\n{responseContent}";
-
-
-        //var responseBytes = Encoding.UTF8.GetBytes(response);
-
-
-        // client.GetStream().Write(responseBytes, 0, responseBytes.Length);
-        //client.GetStream().Flush();
-
-
-        string filePath = "Websites/index.html";
-        //string filePath = Path.Combine(basePath, requestModel.Path.TrimStart('/'));
-
+        if (requestPath == "/")
+        {
+            requestPath = _website.DefaultPage;
+        }
+        
+        else
+        {
+            requestPath = requestPath.TrimStart('/');
+        }
+        
+        string filePath = Path.Combine(basepath, websitePath, requestPath);
         Console.WriteLine($"Checking file at path: {filePath}");
+        
         if (File.Exists(filePath))
         {
             var fileContent = await File.ReadAllBytesAsync(filePath);
             var responseHeader =
-                $"HTTP/1.1 200 OK\r\nContent-Type: {GetContentType(filePath)}; charset=utf-8\r\nContent-Length: {fileContent.Length + fileContent.Length}\r\n\r\n";
+                $"HTTP/1.1 200 OK\r\nContent-Type: {GetContentType(filePath)}; charset=utf-8\r\nContent-Length: {fileContent.Length}\r\n\r\n";
             //string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 13\r\n\r\n<h1>Hello</h1>";
-
+        
             Console.WriteLine($"Sending {fileContent.Length} bytes with header: {responseHeader}");
-
+        
             var responseBytes = Encoding.UTF8.GetBytes(responseHeader);
-
+        
             await client.GetStream().WriteAsync(responseBytes, 0, responseBytes.Length);
             await client.GetStream().WriteAsync(fileContent, 0, fileContent.Length);
             await client.GetStream().FlushAsync();
-
+        
             Console.WriteLine("Response sent successfully.");
         }
 
@@ -111,7 +110,6 @@ public class TCPServer
             await client.GetStream().FlushAsync();
         }
     }
-
     private string GetContentType(string path)
     {
         var extension = Path.GetExtension(path).ToLower();

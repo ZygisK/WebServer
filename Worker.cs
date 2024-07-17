@@ -23,7 +23,7 @@ public class Worker : BackgroundService
     {
         foreach (var website in websites) //start a website
         {
-            var websiteServer = new TCPServer(_parser); 
+            var websiteServer = new TCPServer(_parser);
             _ = websiteServer.StartServerAsync(website);
         }
     }

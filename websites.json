@@ -1,15 +1,27 @@
 ﻿{
   "Websites": [
     {
-      "Name": "Nigger",
+      "Name": "Sample",
       "Path" : "baseWebsite",
       "Port": 5001,
       "DefaultPage": "index.html"
     },
     {
-      "Name": "Nigger2",
+      "Name": "Xtrace",
       "Path" : "XtraceLoginPage",
       "Port": 5002,
+      "DefaultPage": "index.html"
+    },
+    {
+      "Name": "Biometric Login",
+      "Path" : "microsoft-biometric-hospital/dist/public",
+      "Port": 5003,
+      "DefaultPage": "index.html"
+    },
+    {
+      "Name": "CS230 Assignment 7",
+      "Path" : "Assignment-7/client/build",
+      "Port": 5004,
       "DefaultPage": "index.html"
     }
   ]
